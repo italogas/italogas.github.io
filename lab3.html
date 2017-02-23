@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Lab 3</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <style>
+	.arc text {
+	  font: 10px sans-serif;
+	  text-anchor: middle;
+	}
+	.arc path {
+	  stroke: #fff;
+	}
+
+  </style>
+</head>
+<body style="background-color: #e6ffff">
+  <div class="container">
+  	<div class="row">
+  		<center><h2 class="text-success" style="font-family: Rockwell">Visualização de dados, Lab 3</h2></center>
+  	</div>
+    <div class="row">
+    	<center><h3 class="text-success" style="font-family: Rockwell"><small>Pessoas digitando coisas aleatórias II.</small></h3></center>
+    	<center><h5 style="font-family: Rockwell"><small><a href="https://caio-batista.github.io/">Gráfico original disponível aqui.</a></small></h5></center>
+    	<hr>
+    	<h4 class="text-success" style="font-family: Rockwell">	O que foi feito?: <small>Optei por um <a href="https://bl.ocks.org/mbostock/3887193">Donut Chart</a> distinto para cada pergunta. Os diferentes tons de azul, identificam as respostas diferentes. Gráfico  a esquerda são os resultados para a <b>pergunta 1</b>, o da direita para a <b>pergunta 7</b>. </small></h4>
+    </div>
+  </div>
+  <hr>
+  <div id="chart"></div>
+  <!-- <div><center><p>Optei por um grafico de pizza distinto para cada pergunta. Os diferentes tons de azul, identificam as respostas diferentes. </p></center></div> -->
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script>
+		var width = 400,
+		    height = 360,
+		    radius = Math.min(width, height) / 2;
+
+		var color = d3.scale.ordinal()
+		    .range(["#e6e6ff", "#ccccff" , "#b3b3ff", "#9999ff", "#8080ff", "#6666ff", "#4d4dff", "#3333ff", "#0000cc", "#000080"]);
+	 
+		var arc = d3.svg.arc()
+		    .outerRadius(radius - 10)
+		    .innerRadius(radius - 70);
+
+		var pie = d3.layout.pie()
+		    .sort(null)
+		    .value(function(d) { return d.frequency; });
+
+		d3.select("#chart").attr("align","center");
+
+		var svg = d3.select("#chart").append("svg")
+		    .attr("width", width)
+		    .attr("height", height)
+		    .append("g")
+		    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+		var svg2 = d3.select("#chart").append("svg")
+		    .attr("width", width)
+		    .attr("height", height)
+		    .append("g")
+		    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")"); 
+
+		d3.tsv("data/data1.tsv", type, function(error, data) {
+			if (error) throw error;
+
+			var g = svg.selectAll(".arc")
+			      .data(pie(data))
+			      .enter().append("g")
+			      .attr("class", "arc");
+
+			g.append("path")
+			      .attr("d", arc)
+			      .style("fill", function(d) { return color(d.data.letter); });
+
+			g.append("text")
+			      .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+			      .attr("dy", ".35em")
+			      .text(function(d) { return d.data.letter; });
+		});
+
+		d3.tsv("data/data2.tsv", type, function(error, data) {
+			if (error) throw error;
+
+			var g = svg2.selectAll(".arc")
+			      .data(pie(data))
+			      .enter().append("g")
+			      .attr("class", "arc");
+
+			g.append("path")
+			      .attr("d", arc)
+			      .style("fill", function(d) { return color(d.data.letter); });
+
+			g.append("text")
+			      .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+			      .attr("dy", ".35em")
+			      .text(function(d) { return d.data.letter; });
+		});
+
+		function type(d) {
+		  d.frequency = +d.frequency;
+		  return d;
+		}
+  </script>
+</body>
