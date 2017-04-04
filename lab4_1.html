@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Lab 4</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <style>
+  	.municipio {
+      stroke: #fff;
+      stroke-width: 0.8px;
+    }
+    .states {
+	  fill: none;
+	  stroke: #fff;
+	  stroke-linejoin: round;
+	}
+	.arc text {
+	  font: 10px sans-serif;
+	  text-anchor: middle;
+	}
+	.arc path {
+	  stroke: #fff;
+	}
+
+  </style>
+</head>
+<body style="background-color: #e6ffff">
+  <div class="container">
+  	<div class="row">
+  		<center><h2 class="text-success" style="font-family: Rockwell">Visualização de dados, Lab 4: O sertão</h2></center>
+  	</div>
+  	<div class="row">
+  		<center>
+  		<ul class="breadcrumb">
+			<li><a href="lab4_1.html">Mapa 1</a></li>
+			<li><a href="lab4_2.html">Mapa 2</a></li>
+			<li><a href="lab4_3.html">Mapa 3</a></li>
+		</ul>
+		</center>
+  	</div>
+    <div class="row">
+    	<hr>
+    	<h4 class="text-success" style="font-family: Rockwell">	Mapa 1: <small> IN026_RS, Municípios do semiárido que sao os maiores coletores de resíduos sólidos da construção civil em relação quantidade total coletada </small></h4>
+    </div>
+  </div>
+  <hr>
+  <div id="chart"></div>
+  <footer></footer>
+  <script src="js/d3.v4.min.js"></script>
+  <script src="//d3js.org/d3-color.v1.min.js"></script>
+  <script src="//d3js.org/topojson.v1.min.js"></script>
+  <script>
+		var
+		    width = 1000,
+		    height = 800;
+
+		var svg = d3.select("#chart")
+				.append("svg")
+				.attr('version', '1.1')
+				.attr('viewBox', '0 0 '+width+' '+height)
+				.attr('width', '100%')
+				.attr('class', 'map-chart');
+
+		var g = svg.append("g")
+			    .attr("class", "key")
+			    .attr("transform", "translate(0,40)");
+
+	    var projection = d3.geoAlbers()
+	        .center([-39.3493291, -7.2275766])
+	        .rotate([0, 0])
+	        .parallels([0, 0])
+	        .scale(3000);
+
+	    var path = d3.geoPath().projection(projection);
+
+	    var sabScale = d3.scaleThreshold();
+    	var gastoScale = d3.scaleLinear();
+
+		d3.queue()
+			.defer(d3.json, "data/municipios_sab.json")
+			.defer(d3.csv, "data/indicadores_construcao_civil2_1.csv")
+			.await(draw);
+
+	    function draw(error, sab, municipiosXgasto) {
+	      if (error) throw error;
+			var municipios = topojson.feature(sab, sab.objects.municipios_sab);
+			sabScale.domain([5, 10, 50, 100, 500])
+			//sabScale.domain([5000, 10000, 30000, 50000, 100000])
+	        // Purple
+	    	//.range([d3.rgb(84, 39, 143, 0.2), d3.rgb(84, 39, 143, 0.4), d3.rgb(84, 39, 143, 0.6), d3.rgb(84, 39, 143, 0.8), d3.rgb(84, 39, 143, 1)]);
+			// Orange
+	    	.range([d3.rgb(248, 80, 44, 0.2), d3.rgb(248, 80, 44, 0.4), d3.rgb(248, 80, 44, 0.6), d3.rgb(248, 80, 44, 0.8), d3.rgb(248, 80, 44, 1)]);
+	        // Blue
+	    	// .range([d3.rgb(8, 48, 107, 0.2), d3.rgb(8, 48, 107, 0.4), d3.rgb(8, 48, 107, 0.6), d3.rgb(8, 48, 107, 0.8), d3.rgb(8, 48, 107, 1)]);
+	    	gastoScale.domain([d3.min(municipiosXgasto, function(d) { console.log(d.taxa); return +d.taxa }), d3.max(municipiosXgasto, function(d) { return +d.taxa })])
+	    	.range([d3.rgb(8, 48, 107, 0.2), d3.rgb(8, 48, 107, 0.4), d3.rgb(8, 48, 107, 0.6), d3.rgb(8, 48, 107, 0.8), d3.rgb(8, 48, 107, 1)]);
+    		//.range(d3.schemeOranges[9]);
+	        for (var i = 0; i < municipiosXgasto.length; i++) {
+				municipios.features[i].properties.value = municipiosXgasto[i].taxa
+		    }
+				
+	      svg.selectAll(".municipio")
+	        .data(municipios.features)
+	      	.enter().append("path")
+	        .attr("id", function(d) { return "municipio-" + d.ID; })
+	        .attr("d", path)
+	        .attr("fill", function(d){ return sabScale(+d.properties.value)});
+
+	      svg.append("path")
+      		.datum(topojson.mesh(sab, sab.objects.municipios_sab, function(a, b) { return a !== b; }))
+      		.attr("class", "states")
+      		.attr("d", path);
+
+	    }
+  </script>
+</body>
