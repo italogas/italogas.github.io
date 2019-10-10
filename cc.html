@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<title>Dados de disciplinas</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+	<script src="js/bootstrap.js"></script>
+	<script src="js/d3.v4.min.js"></script>
+	<script src="//d3js.org/d3-color.v1.min.js"></script>
+	<script src="//d3js.org/topojson.v1.min.js"></script>
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link href="css/estilo.scss" rel="stylesheet">
+	<style>
+		.node {
+			fill: #ccc;
+			stroke: #fff;
+			stroke-width: 2px;
+		}
+
+		.link {
+				stroke: #999;
+				stroke-opacity: 0.6;
+		}
+
+	</style>
+	</head>
+	<body style="background-color: #b3ffff">
+	<!-- Início da barra de navegação -->
+	<nav id="navegacao" class="navbar navbar-inverse navbar-fixed-top">
+			<!-- <div class="navbar navbar-inverse navbar-fixed-top"> -->
+				<div class="container">
+					
+					<!-- botao utilizado para abrir menu em dispositivos resolucao menor -->
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					
+					<!-- logo do site -->
+					<!-- <a class="navbar-brand texto4" href="#">Ítalo Guedes A. Silva</a> -->
+					
+					<!-- inicio menu -->
+					<div class="navbar-collapse collapse navbar-right">
+					<ul class="nav navbar-nav">
+						<li class="active texto3"><a href="#">Dados disciplinas</a></li>
+						<li><a href="#seca" class="texto3">Seca sertão</a></li>
+					</ul>
+					</div>
+					<!-- fim menu -->
+					
+				</div>
+			<!-- </div> -->
+	</nav>
+	<section>
+		<div class="container" style="margin-top: 50px;">
+			<div class="row">
+				<center><h3 class="texto">Comparando esqueleto de cursos da UFCG </h3></center>
+			</div>
+			<div class="row" style="margin-top: 50px">
+				<div class="col-md-3"></div>
+				<div class="col-md-6">
+						<center>
+								<button type="button" class="btn btn-primary btn-lg btn3d" onclick="window.location.href='cc.html'">Computação</button>
+								<button type="button" class="btn btn-default btn-lg btn3d" onclick="window.location.href='adm.html'">Admnistração</button>
+						</center>
+				</div>
+				<div class="col-md-3"></div>
+			</div>
+			<div class="row">
+				<hr>
+				<center><h4 class="texto2"> Ciência da Computação </h4></center>
+				<center><h4 class="text-success"> <small style="color: black;"> Disciplinas são mapeadas para cada cor de acordo com semestre. </small></h4></center>
+				<center><h4><small style="font-size: 12px; color: black;"> O grande grupo demonstra que maioria das disciplinas do curso possuem dependências. </small></h4></center>
+			</div>
+		</div>
+	</section>
+	<div id="chart"></div>
+	<!-- Rodape -->
+	<footer id="rodape">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-4"></div>
+				<div class="col-md-4">
+					<a href="#" class="item-rede-social" style="padding: 10px;"><img src="img/linkedin.png" alt=""></a>
+					<a href="#" class="item-rede-social" style="padding: 10px;"><img src="img/facebook.png" alt=""></a>
+					<a href="#" class="item-rede-social" style="padding: 10px;"><img src="img/google-plus.png" alt=""></a>
+				</div> 
+				<div class="col-md-4"></div>
+			</div><!--row-->
+			<div class="row" style="margin-top: 100px">
+				<div class="col-md-5"></div>
+				<div class="col-md-2">
+					<center><p>Developed by <span>italogas - 2019<span></p></center>
+				</div> 
+				<div class="col-md-5"></div>
+			</div><!--row-->
+		</div>
+	</footer>
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<!-- Include all compiled plugins (below), or include individual files as needed -->
+	<script src="bootstrap/js/bootstrap.min.js"></script>
+	<script>
+		var
+			width = 2000,
+			height = 1000;
+
+		var svg = d3.select("#chart")
+				.append("svg")
+				.attr('version', '1.1')
+				.attr('viewBox', '0 0 '+width+' '+height)
+				.attr('width', '100%');
+
+		var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+		var simulation = d3.forceSimulation()
+			.force("link", d3.forceLink().id(function(d) { return d.id; }))
+			.force("charge", d3.forceManyBody())
+			.force("center", d3.forceCenter(width / 2, height / 2));
+
+		d3.queue()
+			.defer(d3.json, "dados_disciplinas/ciencia_da_computacao_d_cg.json")
+			.await(draw);
+
+		var semestres = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]	
+		semestres.forEach(function(d){
+			var g = svg.append("g");
+			g.append("rect")
+				.attr("x", 200)
+				.attr("y", (d*40) + (height / 2) - 200)
+				.attr("title", d)
+				.attr("width","40px")
+				.attr("height","40px")
+				.attr("fill", color(d))
+				.attr("stroke","#7f7f7f")
+				.attr("stroke-width","2")
+				.style("stroke", "black")
+				.style("margin-left","100px")
+
+			g.append("text")
+				.attr("x", 250)
+				.attr("y", (d*40) + (height / 2) - 180)
+				.attr("font-family", "Verdana")
+				.attr("font-size", 16)
+				.attr("fill", "black")
+				.text(d + "º Semestre")
+			}
+		);
+
+		function draw(error, data) {
+			if (error) throw error;
+
+			var links = []
+			data.forEach(function(d){
+				d.pre_requisitos.forEach(function(p){
+					links.push({source: String(d.codigo_disciplina), target: String(p)});
+				});
+			})
+
+			var nodes = data.map(function(d){
+				return {id: String(d.codigo_disciplina),
+								codigo_departamento : d.codigo_departamento,
+								nome : d.disciplina,
+								semestre: d.semestre};
+			});
+
+			var link = svg.append("g")
+				.attr("class", "link")
+				.selectAll("line")
+				.data(links)
+				.enter().append("line");
+
+			var node = svg.append("g")
+				.attr("class", "nodes")
+				.selectAll("circle")
+				.data(nodes)
+				.enter().append("circle")
+				.attr("r", 7)
+				.attr("fill", function(d) { return color(d.semestre); })
+				.call(d3.drag()
+					.on("start", dragstarted)
+					.on("drag", dragged)
+					.on("end", dragended));
+
+			node.append("title")
+				.text(function(d) { return d.nome; });
+
+			simulation
+				.nodes(nodes)
+				.on("tick", ticked);
+
+			simulation.force("link")
+				.links(links);
+
+			function ticked() {
+				link
+				.attr("x1", function(d) { return d.source.x; })
+				.attr("y1", function(d) { return d.source.y; })
+				.attr("x2", function(d) { return d.target.x; })
+				.attr("y2", function(d) { return d.target.y; });
+				node
+				.attr("cx", function(d) { return d.x; })
+				.attr("cy", function(d) { return d.y; });
+			}
+		}
+
+		function dragstarted(d) {
+			if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+			d.fx = d.x;
+			d.fy = d.y;
+		}
+
+		function dragged(d) {
+			d.fx = d3.event.x;
+			d.fy = d3.event.y;
+		}
+
+		function dragended(d) {
+			if (!d3.event.active) simulation.alphaTarget(0);
+			d.fx = null;
+			d.fy = null;
+		}
+	</script>
+</body>
